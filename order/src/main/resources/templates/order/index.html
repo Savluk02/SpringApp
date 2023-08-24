@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div class="container mainContainer">
+    <header>
+        <div class="logo-name">
+            <p class="logo-text">Spring App</p>
+        </div>
+        <div class="menu">
+            <a th:href="@{/}">Main page</a>
+            <a th:href="@{/order/ownOrder}">My orders</a>
+            <a th:href="@{/person}">[[${#request.remoteUser}]]</a>
+        </div>
+    </header>
+    <h1>Order information</h1>
+    <table>
+        <tr>
+            <th>Order ID</th>
+            <td th:text="${order.id}"></td>
+        </tr>
+        <tr>
+            <th>User Name</th>
+            <td th:text="${order.userName}"></td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td th:text="${order.description}"></td>
+        </tr>
+        <tr>
+            <th>Creation Time</th>
+            <td th:text="${order.creationTime}"></td>
+        </tr>
+        <tr>
+            <th>Specialization</th>
+            <td th:text="${order.specialization}"></td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td th:text="${order.status}" id="status"></td>
+        </tr>
+    </table>
+    <th:block th:if="${#request.isUserInRole('ROLE_PERSONAL')}">
+    <form th:method="post" th:action="@{'/order/'+ ${order.id} + '/take'}">
+        <button type="submit">Take the order</button>
+    </form>
+    </th:block>
+</div>
+<script>
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/topic/some-topic', function (response) {
+
+                console.log('response status')
+                var data = JSON.parse(response.body);
+
+                document.getElementById('status').innerText = data.newStatus;
+            });
+        });
+    }
+
+    // Викликати цю функцію при завантаженні сторінки
+    connect();
+</script>
+</body>
+</html>

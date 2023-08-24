@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My order</title>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mainContainer">
+    <header>
+        <div class="logo-name">
+            <p class="logo-text">Spring App</p>
+        </div>
+        <div class="menu">
+            <a th:href="@{/}">Main page</a>
+            <a th:href="@{/order}">My orders</a>
+            <a th:href="@{/person}">[[${#request.remoteUser}]]</a>
+        </div>
+    </header>
+    <h1>My orders</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>User</th>
+            <th>Specialization</th>
+            <th>Publication date</th>
+            <th>Status</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="orders : ${userOrders}">
+            <td th:text="${orders.id}">123</td>
+            <td th:text="${orders.userName}">John Doe</td>
+            <td th:text="${orders.specialization}">Specialization</td>
+            <td th:text="${orders.creationTime}">2023-08-22</td>
+            <td th:text="${orders.status}">In Progress</td>
+            <td text="Перейти до замовлення">
+                <a th:href="@{'/order/' + ${orders.id}}">Go to Description</a>
+            </td>
+            <td text="Delete order" >
+                <form th:method="POST" th:action="@{'/order/ownOrder/' + ${orders.id}}">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <input type="submit" value="Delete"/>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

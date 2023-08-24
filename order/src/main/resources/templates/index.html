@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Main Page</title>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+<!--    <link th:href="@{/js/order.js}" rel="stylesheet"/>-->
+    <link rel="stylesheet" href="../static/css/main.css">
+    <script th:src="@{/js/order.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div class="container mainContainer">
+    <header>
+        <div class="logo-name">
+            <p class="logo-text">Spring App</p>
+        </div>
+        <div class="menu">
+            <a class="active" th:href="@{/}">Main page</a>
+            <a th:href="@{/order/ownOrder}">My orders</a>
+            <a th:href="@{/person}">[[${#request.remoteUser}]]</a>
+        </div>
+    </header>
+    <h1>Add new order</h1>
+
+    <button id="addButton" onclick="showFields()">Add</button>
+
+    <div id="orderFields" style="display: none;">
+        <form th:action="@{/create-order}" th:method="POST">
+            <label for="specialization">Specialization:</label>
+            <input type="text" id="specialization" name="specialization" required/>
+
+            <label for="description">Order description:</label>
+            <textarea id="description" name="description" rows="4" cols="50" required></textarea>
+
+            <button type="submit">Place an order</button>
+        </form>
+    </div>
+
+
+
+    <h1>List of orders</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Specialization</th>
+            <th>Publication date</th>
+            <th>Status</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody >
+        <tr th:each="orders : ${order}">
+            <td th:text="${orders.userName}" >John Doe</td>
+            <td th:text="${orders.specialization}" >Specialization</td>
+            <td th:text="${orders.creationTime}" >2023-08-22</td>
+            <td th:text="${orders.status}" >In Progress</td>
+            <td text="Перейти до замовлення">
+                <a th:href="@{'/order/' + ${orders.id}}">Go to Description</a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+    <h1>New orders</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Specialization</th>
+            <th>Publication date</th>
+            <th>Status</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody id="orderTableBody">
+        <tr>
+            <td  id="order.userName"></td>
+            <td  id="order.specialization"></td>
+            <td id="order.creationTime"></td>
+            <td  id="order.status"></td>
+            <td text="Перейти до замовлення">
+                <a></a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+
+</div>
+<script type="text/javascript">
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/orders', function (message) {
+                var order = JSON.parse(message.body);
+                updateOrderTable(order);
+            });
+        });
+    }
+
+    function updateOrderTable(order) {
+        var tableBody = document.getElementById("orderTableBody");
+        var newRow = tableBody.insertRow(0);
+
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+        var cell5 = newRow.insertCell(4);
+
+        cell1.innerHTML = order.userName;
+        cell2.innerHTML = order.specialization;
+        cell3.innerHTML = order.creationTime;
+        cell4.innerHTML = order.status;
+        cell5.innerHTML = '<a href="/">Go to Description</a>';
+    }
+    connect();
+</script>
+</body>
+</html>

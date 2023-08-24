@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>[[${#request.remoteUser}]]</title>
+    <link th:href="@{/css/main.css}" rel="stylesheet"/>
+    <link rel="stylesheet" href="../static/css/main.css">
+</head>
+<body>
+<div class="container mainContainer">
+    <header>
+        <div class="logo-name">
+            <p class="logo-text">Spring App</p>
+        </div>
+        <div class="menu">
+            <a th:href="@{/}">Main page</a>
+            <a th:href="@{/order/ownOrder}">My orders</a>
+            <a class="active" th:href="@{/person}">[[${#request.remoteUser}]]</a>
+        </div>
+    </header>
+
+    <button id="confirmButton" th:onclick="showConfirmation()">Change Role</button>
+
+    <div id="confirmationModal" style="display: none;">
+        <p>Change role on "ROLE_PERSONAL"?</p>
+        <button onclick="confirmAction('yes')">Yes</button>
+        <button onclick="confirmAction('no')">No</button>
+    </div>
+    <form th:action="@{/logout}" th:method="POST">
+        <input type="submit" value="Logout"/>
+    </form>
+
+</div>
+<script>
+    function showConfirmation() {
+        document.getElementById('confirmationModal').style.display = 'block';
+    }
+
+    function confirmAction(choice) {
+        if (choice === 'yes') {
+
+            window.location.href = '/change-role';
+        } else {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
